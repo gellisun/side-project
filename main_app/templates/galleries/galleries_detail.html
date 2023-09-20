@@ -1,0 +1,69 @@
+{% extends 'base.html' %} {% block content %}
+
+<h1>Gallery Details</h1>
+
+<div class="card">
+  <div class="card-content">
+    <span class="card-title">{{ gallery.name }}</span>
+    <p>Location: {{ gallery.location }}</p>
+    <p>Description: {{ gallery.description|linebreaks }}</p>
+    <p>Opening Hours: {{ gallery.hours }}</p>
+    <button class="btn blue accent-1" id="toggle-exhibition-form">
+      Add an exhibition and feedback
+    </button>
+    <div id="exhibition-form-container">
+      <form
+        action="{% url 'exhibition_create' gallery.id %}"
+        method="POST"
+        id="exhibition-form"
+      >
+        {% csrf_token %} {{ exhibition_form.as_p }}
+        <input type="submit" class="btn blue accent-1" value="Add" />
+      </form>
+    </div>
+    <table class="striped">
+      <thead>
+        <tr>
+          <th>Exhibition</th>
+          <th>Exhibtion ends</th>
+          <th>Description</th>
+          <th>Feedback from user</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for exhibition in gallery.exhibition_set.all %}
+        <tr>
+          <td>{{ exhibition.name }}</td>
+          <td>{{ exhibition.closingDate }}</td>
+          <td>{{ exhibition.description }}</td>
+          <td>{{ exhibition.feedback }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const exhibitionFormContainer = document.getElementById(
+      "exhibition-form-container"
+    );
+    const toggleButton = document.getElementById("toggle-exhibition-form");
+
+    function toggleFormVisibility() {
+      if (exhibitionFormContainer.style.display === "none") {
+        exhibitionFormContainer.style.display = "block";
+        toggleButton.textContent = "Hide form";
+      } else {
+        exhibitionFormContainer.style.display = "none";
+        toggleButton.textContent = "Add an exhibition and feedback";
+      }
+    }
+
+    exhibitionFormContainer.style.display = "none";
+    toggleButton.addEventListener("click", toggleFormVisibility);
+  });
+</script>
+
+{% endblock %}
