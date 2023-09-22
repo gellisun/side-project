@@ -1,0 +1,32 @@
+{% extends 'base.html' %} 
+{% block content %}
+<h1>My Saved Exhibitions</h1>
+<table class="striped">
+    <thead>
+        <tr>
+            <th>Exhibition</th>
+            <th>Exhibition ends</th>
+            <th>Description</th>
+            <th>Feedback from user</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exhibition in saved_exhibitions %}
+        <tr>
+            <td>{{ exhibition.name }}</td>
+            <td>{{ exhibition.closingDate }}</td>
+            <td>{{ exhibition.description }}</td>
+            <td>{{ exhibition.feedback }}</td>
+            <td>
+                <button
+                class="btn blue accent-1 delete-exhibition"
+                data-exhibition-id="{{ exhibition.id }}"
+                >
+                Delete
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -37,6 +37,14 @@
           <td>{{ exhibition.closingDate }}</td>
           <td>{{ exhibition.description }}</td>
           <td>{{ exhibition.feedback }}</td>
+          <td>
+            <button
+              class="btn blue accent-1 save-exhibition"
+              data-exhibition-id="{{ exhibition.id }}"
+            >
+              Save
+            </button>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -46,24 +54,72 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const exhibitionFormContainer = document.getElementById(
-      "exhibition-form-container"
-    );
-    const toggleButton = document.getElementById("toggle-exhibition-form");
-
-    function toggleFormVisibility() {
-      if (exhibitionFormContainer.style.display === "none") {
-        exhibitionFormContainer.style.display = "block";
-        toggleButton.textContent = "Hide form";
-      } else {
-        exhibitionFormContainer.style.display = "none";
-        toggleButton.textContent = "Add an exhibition and feedback";
+      const exhibitionFormContainer = document.getElementById("exhibition-form-container");
+      const toggleButton = document.getElementById("toggle-exhibition-form");
+      const saveButtons = document.querySelectorAll(".save-exhibition");
+  
+      function toggleFormVisibility() {
+          if (exhibitionFormContainer.style.display === "none" || exhibitionFormContainer.style.display === "") {
+              exhibitionFormContainer.style.display = "block";
+              toggleButton.textContent = "Hide form";
+          } else {
+              exhibitionFormContainer.style.display = "none";
+              toggleButton.textContent = "Add an exhibition and feedback";
+          }
       }
+  
+      exhibitionFormContainer.style.display = "none";
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+          }
+        }
+        return cookieValue;
     }
 
-    exhibitionFormContainer.style.display = "none";
-    toggleButton.addEventListener("click", toggleFormVisibility);
+  
+      function saveExhibition(exhibitionId) {
+          fetch(`/api/save-exhibition/${exhibitionId}/`, {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": getCookie("csrftoken"),
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ favorite: true }),
+          })
+              .then((response) => response.json())
+              .then((data) => {
+                  if (data.success) {
+                      const button = document.querySelector(`.save-exhibition[data-exhibition-id="${exhibitionId}"]`);
+                      button.textContent = "Saved";
+                      button.disabled = true;
+                  } else {
+                      console.log(errorMessage)
+                  }
+              })
+              .catch((error) => {
+                  console.error("Error:", error);
+              });
+      }
+  
+      saveButtons.forEach((button) => {
+          button.addEventListener("click", (event) => {
+              const exhibitionId = event.target.dataset.exhibitionId;
+              saveExhibition(exhibitionId);
+          });
+      });
+  
+      toggleButton.addEventListener("click", toggleFormVisibility);
   });
-</script>
+  </script>
+  
 
 {% endblock %}

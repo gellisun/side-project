@@ -20,16 +20,24 @@
       type="text/css"
       href="{% static 'css/style.css' %}"
     />
-    <title>Find</title>
+    <title>Culture Hub</title>
   </head>
   <body>
     <header>
       <nav>
         <div class="nav-wrapper blue accent-4">
-          <a href="/" class="brand-logo">&nbsp;&nbsp;Find</a>
+          <a href="/" class="brand-logo">&nbsp;&nbsp;Culture Hub</a>
           <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="/about">About</a></li>
-            <li><a href="/galleries">View All Galleries</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            {% if user.is_authenticated %}
+              <li><a href="{% url 'galleries_index' %}">View All Galleries</a></li>
+              <li><a href="">View All Artists</a></li>
+              <li><a href="{% url 'exhibitions_saved' %}">My Saved List</a></li>
+              <li><a href="{% url 'logout' %}">Log Out</a></li>
+            {% else %}
+              <li><a href="{% url 'signup' %}">Sign Up</a></li>
+              <li><a href="{% url 'login' %}">Log In</a></li>
+            {% endif %}
           </ul>
         </div>
       </nav>
