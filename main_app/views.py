@@ -34,8 +34,9 @@ def galleries_index(request):
 
 def galleries_detail(request, gallery_id):
     gallery = Gallery.objects.get(id=gallery_id)
+    exhibitions = Exhibition.objects.filter(gallery_id=gallery_id).order_by('-id')
     exhibition_form = ExhibitionForm()
-    return render(request, 'galleries/galleries_detail.html', { 'gallery': gallery, 'exhibition_form': exhibition_form })
+    return render(request, 'galleries/galleries_detail.html', { 'gallery': gallery, 'exhibitions': exhibitions, 'exhibition_form': exhibition_form })
 
 @login_required
 def exhibition_create(request, gallery_id):
@@ -50,10 +51,12 @@ def exhibition_create(request, gallery_id):
             print(form.errors)
     return redirect('galleries_detail', gallery_id=gallery_id)
 
+@login_required
 def save_exhibition(request, exhibition_id):
     try:
         exhibition = Exhibition.objects.get(id=exhibition_id)
         exhibition.user_favourite = True
+        exhibition.user = request.user
         exhibition.save()
         return JsonResponse({"success": True})
     except Exhibition.DoesNotExist:
@@ -61,6 +64,15 @@ def save_exhibition(request, exhibition_id):
     
 def exhibitions_saved(request):
     user = request.user
-    saved_exhibitions = Exhibition.objects.filter(user=user, user_favourite=True)
-    
+    saved_exhibitions = Exhibition.objects.filter(user=user, user_favourite=True).order_by('-id')
     return render(request, 'exhibitions/exhibitions_saved.html', {'saved_exhibitions': saved_exhibitions})
+
+@login_required
+def delete_exhibition(request, exhibition_id):
+    try:
+        exhibition = Exhibition.objects.get(id=exhibition_id)
+        exhibition.user_favourite = False
+        exhibition.save()
+        return JsonResponse({"success": True})
+    except Exhibition.DoesNotExist:
+        return JsonResponse({"success": False})

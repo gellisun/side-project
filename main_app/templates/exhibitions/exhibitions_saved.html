@@ -1,32 +1,77 @@
-{% extends 'base.html' %} 
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h1>My Saved Exhibitions</h1>
 <table class="striped">
-    <thead>
-        <tr>
-            <th>Exhibition</th>
-            <th>Exhibition ends</th>
-            <th>Description</th>
-            <th>Feedback from user</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for exhibition in saved_exhibitions %}
-        <tr>
-            <td>{{ exhibition.name }}</td>
-            <td>{{ exhibition.closingDate }}</td>
-            <td>{{ exhibition.description }}</td>
-            <td>{{ exhibition.feedback }}</td>
-            <td>
-                <button
-                class="btn blue accent-1 delete-exhibition"
-                data-exhibition-id="{{ exhibition.id }}"
-                >
-                Delete
-                </button>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <tr>
+      <th>Exhibition</th>
+      <th>Exhibition ends</th>
+      <th>Description</th>
+      <th>Feedback from user</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for exhibition in saved_exhibitions %}
+    <tr>
+      <td>{{ exhibition.name }}</td>
+      <td>{{ exhibition.closingDate }}</td>
+      <td>{{ exhibition.description }}</td>
+      <td>{{ exhibition.feedback }}</td>
+      <td>
+        <button
+          class="btn blue accent-1 delete-exhibition"
+          data-exhibition-id="{{ exhibition.id }}"
+          onclick="deleteExhibition(this)"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
+
+<script>
+  function deleteExhibition(button) {
+    const exhibitionId = button.getAttribute("data-exhibition-id");
+    const row = button.closest("tr");
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `/api/delete-exhibition/${exhibitionId}/`, true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            row.remove();
+          } else {
+            alert("Failed to delete exhibition.");
+          }
+        } else {
+          alert("An error occurred while processing your request.");
+        }
+      }
+    };
+
+    xhr.send(JSON.stringify({}));
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            var cookies = document.cookie.split(";");
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+  }
+</script>
+
 {% endblock %}
